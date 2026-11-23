@@ -1,4 +1,4 @@
-const WORKER_BASE='https://download.resgatefamilhao.online';
+const WORKER_BASE='https://download.centraldepremios.online';
 const API_URL=WORKER_BASE+'/config';
 const APK_LINK_URL=WORKER_BASE+'/api/v1/generate-token';
 const STORAGE_KEY='campanha-premiada-settings';
