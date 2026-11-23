@@ -293,7 +293,7 @@ document.getElementById('settingsForm')?.addEventListener('submit',async e=>{
     console.error(error);
     if(error.message==='TOKEN_REQUIRED') toast('Salvamento cancelado: token não informado.');
     else if(error.message==='UNAUTHORIZED') toast('Token incorreto. Tente salvar novamente.');
-    else toast('Erro ao salvar globalmente. Tente novamente.',3500);
+    else toast('Erro ao salvar: '+(error?.message||'falha de conexão com o Worker'),6000);
   }finally{
     if(button) button.disabled=false;
   }
