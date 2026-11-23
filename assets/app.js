@@ -45,24 +45,11 @@ function render(){
   if(terms) terms.href=s.termsUrl||'#';
 }
 
-async function loadGlobalConfig(){
+function loadGlobalConfig(){
   try{
-    const response=await fetch(API_URL+'?t='+Date.now(),{
-      method:'GET',
-      cache:'no-store',
-      headers:{'Accept':'application/json'}
-    });
-    if(!response.ok) throw new Error('HTTP '+response.status);
-    const remote=await response.json();
-    settings={...defaults,...remote};
-    try{localStorage.setItem(STORAGE_KEY,JSON.stringify(settings))}catch{}
-  }catch(error){
-    console.error('Falha ao carregar configuração global:',error);
-    try{
-      settings={...defaults,...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')};
-    }catch{
-      settings={...defaults};
-    }
+    settings={...defaults,...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')};
+  }catch{
+    settings={...defaults};
   }
   render();
 }
