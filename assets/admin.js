@@ -93,44 +93,18 @@ function handleUnauthorized(response){
   }
 }
 
-async function loadGlobalConfig(){
+function loadGlobalConfig(){
   try{
-    const response=await fetch(API_URL+'?t='+Date.now(),{
-      method:'GET',
-      cache:'no-store',
-      headers:{'Accept':'application/json'}
-    });
-    if(!response.ok) throw new Error('HTTP '+response.status);
-    const data=await response.json();
-    fillForm(data);
-    try{localStorage.setItem(STORAGE_KEY,JSON.stringify(data))}catch{}
-  }catch(error){
-    console.error(error);
-    try{
-      const cached=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
-      fillForm(cached);
-      toast('Não foi possível acessar a configuração global. Exibindo cópia local.',3500);
-    }catch{
-      fillForm(defaults);
-      toast('Não foi possível acessar a configuração global.',3500);
-    }
+    const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
+    fillForm(saved);
+  }catch{
+    fillForm(defaults);
   }
 }
 
-async function postConfig(data){
-  const response=await fetch(API_URL,{
-    method:'POST',
-    headers:authHeaders({'Content-Type':'application/json'}),
-    body:JSON.stringify(data)
-  });
-
-  handleUnauthorized(response);
-
-  if(!response.ok){
-    const text=await response.text().catch(()=> '');
-    throw new Error('HTTP '+response.status+' '+text);
-  }
-  return response.json();
+function saveLocalConfig(data){
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+  return data;
 }
 
 async function loadApkStatus(){
@@ -279,38 +253,33 @@ async function deleteApk(){
   }
 }
 
-document.getElementById('settingsForm')?.addEventListener('submit',async e=>{
+document.getElementById('settingsForm')?.addEventListener('submit',e=>{
   e.preventDefault();
   const button=e.submitter || document.querySelector('.save-button');
   if(button) button.disabled=true;
 
   try{
     const data=collectForm();
-    await postConfig(data);
-    try{localStorage.setItem(STORAGE_KEY,JSON.stringify(data))}catch{}
-    toast('Alterações salvas globalmente.');
+    saveLocalConfig(data);
+    toast('Alterações salvas neste navegador.');
   }catch(error){
     console.error(error);
-    if(error.message==='TOKEN_REQUIRED') toast('Salvamento cancelado: token não informado.');
-    else if(error.message==='UNAUTHORIZED') toast('Token incorreto. Tente salvar novamente.');
-    else toast('Erro ao salvar: '+(error?.message||'falha de conexão com o Worker'),6000);
+    toast('Não foi possível salvar neste navegador.',3500);
   }finally{
     if(button) button.disabled=false;
   }
 });
 
-document.getElementById('restoreButton')?.addEventListener('click',async()=>{
-  if(!confirm('Restaurar os valores padrão globalmente?')) return;
+document.getElementById('restoreButton')?.addEventListener('click',()=>{
+  if(!confirm('Restaurar os valores padrão neste navegador?')) return;
 
   try{
-    await postConfig(defaults);
+    saveLocalConfig(defaults);
     fillForm(defaults);
-    try{localStorage.setItem(STORAGE_KEY,JSON.stringify(defaults))}catch{}
-    toast('Padrão restaurado globalmente.');
+    toast('Padrão restaurado neste navegador.');
   }catch(error){
     console.error(error);
-    if(error.message==='UNAUTHORIZED') toast('Token incorreto. Tente novamente.');
-    else toast('Não foi possível restaurar globalmente.',3500);
+    toast('Não foi possível restaurar neste navegador.',3500);
   }
 });
 
