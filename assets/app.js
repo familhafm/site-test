@@ -45,12 +45,31 @@ function render(){
   if(terms) terms.href=s.termsUrl||'#';
 }
 
-function loadGlobalConfig(){
+async function loadGlobalConfig(){
   try{
-    settings={...defaults,...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')};
-  }catch{
-    settings={...defaults};
+    const response=await fetch(API_URL+'?t='+Date.now(),{
+      method:'GET',
+      cache:'no-store',
+      headers:{'Accept':'application/json'}
+    });
+
+    if(!response.ok) throw new Error('HTTP '+response.status);
+
+    const remote=await response.json();
+    settings={...defaults,...remote};
+
+    try{
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(settings));
+    }catch{}
+  }catch(error){
+    console.error('Endpoint global indisponível, usando cache local:',error);
+    try{
+      settings={...defaults,...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')};
+    }catch{
+      settings={...defaults};
+    }
   }
+
   render();
 }
 
