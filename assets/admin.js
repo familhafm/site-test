@@ -107,6 +107,32 @@ function saveLocalConfig(data){
   return data;
 }
 
+async function mirrorRemoteConfig(data){
+  const token=getAdminToken();
+  if(!token) throw new Error('TOKEN_REQUIRED');
+
+  const response=await fetch(API_URL,{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'Authorization':'Bearer '+token
+    },
+    body:JSON.stringify(data)
+  });
+
+  if(response.status===401){
+    sessionStorage.removeItem(TOKEN_KEY);
+    throw new Error('UNAUTHORIZED');
+  }
+
+  if(!response.ok){
+    const detail=await response.text().catch(()=> '');
+    throw new Error('HTTP '+response.status+' '+detail);
+  }
+
+  return response.json().catch(()=>({ok:true}));
+}
+
 async function loadApkStatus(){
   const badge=document.getElementById('apkStatusBadge');
   const name=document.getElementById('apkCurrentName');
@@ -253,33 +279,57 @@ async function deleteApk(){
   }
 }
 
-document.getElementById('settingsForm')?.addEventListener('submit',e=>{
+document.getElementById('settingsForm')?.addEventListener('submit',async e=>{
   e.preventDefault();
   const button=e.submitter || document.querySelector('.save-button');
   if(button) button.disabled=true;
 
+  const data=collectForm();
+
   try{
-    const data=collectForm();
     saveLocalConfig(data);
-    toast('Alterações salvas neste navegador.');
   }catch(error){
     console.error(error);
     toast('Não foi possível salvar neste navegador.',3500);
+    if(button) button.disabled=false;
+    return;
+  }
+
+  try{
+    await mirrorRemoteConfig(data);
+    toast('Alterações salvas e publicadas no site.');
+  }catch(error){
+    console.error(error);
+    if(error.message==='TOKEN_REQUIRED'){
+      toast('Salvo localmente. Para publicar globalmente, informe o ADMIN_TOKEN.',4500);
+    }else if(error.message==='UNAUTHORIZED'){
+      toast('Salvo localmente. ADMIN_TOKEN incorreto para publicação global.',5000);
+    }else{
+      toast('Salvo localmente, mas o endpoint global está indisponível.',5000);
+    }
   }finally{
     if(button) button.disabled=false;
   }
 });
 
-document.getElementById('restoreButton')?.addEventListener('click',()=>{
-  if(!confirm('Restaurar os valores padrão neste navegador?')) return;
+document.getElementById('restoreButton')?.addEventListener('click',async()=>{
+  if(!confirm('Restaurar os valores padrão?')) return;
 
   try{
     saveLocalConfig(defaults);
     fillForm(defaults);
-    toast('Padrão restaurado neste navegador.');
   }catch(error){
     console.error(error);
     toast('Não foi possível restaurar neste navegador.',3500);
+    return;
+  }
+
+  try{
+    await mirrorRemoteConfig(defaults);
+    toast('Padrão restaurado e publicado no site.');
+  }catch(error){
+    console.error(error);
+    toast('Padrão restaurado localmente, mas o endpoint global está indisponível.',5000);
   }
 });
 
