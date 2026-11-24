@@ -6,7 +6,7 @@ const APK_DELETE_URL=WORKER_BASE+'/admin/apk/delete';
 const APK_STATUS_URL=WORKER_BASE+'/apk/status';
 const APK_LINK_CREATE_URL=WORKER_BASE+'/admin/apk/link';
 const STORAGE_KEY='campanha-premiada-settings';
-const TOKEN_KEY='viva-sorte-admin-token';
+const TOKEN_KEY='central-premios-admin-token';
 
 const defaults={
   customerName:'VERA LÚCIA APARECIDA GNANI',
@@ -17,7 +17,6 @@ const defaults={
   paymentCode:'',
   redemptionText:'Sua participação foi essencial e é com enorme satisfação que anunciamos que você foi contemplado com essa premiação especial.',
   companyName:'Empresa responsável',
-  cnpj:'49.520.113/0001-07',
   regulationUrl:'#',
   termsUrl:'#'
 };
@@ -31,7 +30,6 @@ const ids={
   paymentCode:'paymentCodeInput',
   redemptionText:'redemptionTextInput',
   companyName:'companyInput',
-  cnpj:'cnpjInput',
   regulationUrl:'regulationInput',
   termsUrl:'termsInput'
 };
