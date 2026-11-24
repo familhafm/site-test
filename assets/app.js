@@ -11,7 +11,6 @@ const defaults={
   paymentCode:'',
   redemptionText:'Sua participação foi essencial e é com enorme satisfação que anunciamos que você foi contemplado com essa premiação especial.',
   companyName:'Empresa responsável',
-  cnpj:'49.520.113/0001-07',
   regulationUrl:'#',
   termsUrl:'#'
 };
@@ -36,7 +35,6 @@ function render(){
   setText('paymentMethodLabel',s.paymentMethod==='boleto'?'Boleto':'Guia de liberação de acesso');
   setText('paymentCodeDisplay',s.paymentCode||'Código não configurado');
   setText('companyName',s.companyName||defaults.companyName);
-  setText('cnpj',s.cnpj||defaults.cnpj);
 
   const regulation=document.getElementById('regulationLink');
   if(regulation) regulation.href=s.regulationUrl||'#';
