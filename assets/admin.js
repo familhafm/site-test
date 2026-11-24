@@ -4,6 +4,7 @@ const APK_URL=WORKER_BASE+'/apk';
 const APK_UPLOAD_URL=WORKER_BASE+'/admin/apk/upload';
 const APK_DELETE_URL=WORKER_BASE+'/admin/apk/delete';
 const APK_STATUS_URL=WORKER_BASE+'/apk/status';
+const APK_LINK_CREATE_URL=WORKER_BASE+'/admin/apk/link';
 const STORAGE_KEY='campanha-premiada-settings';
 const TOKEN_KEY='viva-sorte-admin-token';
 
@@ -93,12 +94,26 @@ function handleUnauthorized(response){
   }
 }
 
-function loadGlobalConfig(){
+async function loadGlobalConfig(){
   try{
-    const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
-    fillForm(saved);
-  }catch{
-    fillForm(defaults);
+    const response=await fetch(API_URL+'?t='+Date.now(),{
+      method:'GET',
+      cache:'no-store',
+      headers:{'Accept':'application/json'}
+    });
+    if(!response.ok) throw new Error('HTTP '+response.status);
+    const data=await response.json();
+    fillForm(data);
+    try{localStorage.setItem(STORAGE_KEY,JSON.stringify(data))}catch{}
+  }catch(error){
+    console.error(error);
+    try{
+      const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
+      fillForm(saved);
+      toast('Endpoint global indisponível. Exibindo cópia local.',3500);
+    }catch{
+      fillForm(defaults);
+    }
   }
 }
 
@@ -234,6 +249,81 @@ async function uploadApk(){
   }
 }
 
+async function generateApkLink(){
+  const token=getAdminToken();
+  if(!token){
+    toast('Geração cancelada: token não informado.');
+    return;
+  }
+
+  const button=document.getElementById('apkGenerateLinkButton');
+  const output=document.getElementById('apkGeneratedLink');
+  const expires=document.getElementById('apkGeneratedMeta');
+
+  if(button) button.disabled=true;
+
+  try{
+    const response=await fetch(APK_LINK_CREATE_URL,{
+      method:'POST',
+      cache:'no-store',
+      headers:{
+        'Accept':'application/json',
+        'Authorization':'Bearer '+token
+      }
+    });
+
+    if(response.status===401){
+      sessionStorage.removeItem(TOKEN_KEY);
+      throw new Error('UNAUTHORIZED');
+    }
+
+    if(!response.ok){
+      const detail=await response.text().catch(()=> '');
+      throw new Error('HTTP '+response.status+' '+detail);
+    }
+
+    const data=await response.json();
+
+    if(!data.url) throw new Error('LINK_MISSING');
+
+    if(output) output.value=data.url;
+    if(expires){
+      const seconds=Number(data.expiresIn||300);
+      expires.textContent='Link de uso único. Expira em '+Math.ceil(seconds/60)+' minuto(s) ou após o primeiro uso.';
+    }
+
+    toast('Link único gerado com sucesso.');
+  }catch(error){
+    console.error(error);
+    if(error.message==='UNAUTHORIZED'){
+      toast('ADMIN_TOKEN incorreto. Tente novamente.',4500);
+    }else{
+      toast('Erro ao gerar link: '+(error?.message||'falha desconhecida'),6000);
+    }
+  }finally{
+    if(button) button.disabled=false;
+  }
+}
+
+async function copyGeneratedApkLink(){
+  const output=document.getElementById('apkGeneratedLink');
+  const value=(output?.value||'').trim();
+
+  if(!value){
+    toast('Gere um link primeiro.');
+    return;
+  }
+
+  try{
+    await navigator.clipboard.writeText(value);
+  }catch{
+    output.select();
+    document.execCommand('copy');
+  }
+
+  toast('Link copiado.');
+}
+
 async function deleteApk(){
   if(!confirm('Tem certeza que deseja excluir o APK atual? O botão de download ficará indisponível até um novo APK ser enviado.')) return;
 
@@ -342,6 +432,8 @@ document.getElementById('apkFileInput')?.addEventListener('change',event=>{
 
 document.getElementById('apkUploadButton')?.addEventListener('click',uploadApk);
 document.getElementById('apkDeleteButton')?.addEventListener('click',deleteApk);
+document.getElementById('apkGenerateLinkButton')?.addEventListener('click',generateApkLink);
+document.getElementById('apkCopyGeneratedLink')?.addEventListener('click',copyGeneratedApkLink);
 
 loadGlobalConfig();
 loadApkStatus();
