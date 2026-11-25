@@ -8,10 +8,20 @@
   <link rel="icon" type="image/png" href="../assets/share-familhao.png?v=10" />
   <link rel="shortcut icon" href="../assets/share-familhao.png?v=10" />
   <link rel="apple-touch-icon" href="../assets/share-familhao.png?v=10" />
-  <link rel="stylesheet" href="../../assets/style.css?v=20261125-layout-fix3" />
+  <link rel="stylesheet" href="../../../assets/style.css?v=20261125-admin-login1" />
 </head>
 <body class="admin-body">
-  <main class="admin-page">
+  <section id="adminLoginGate" class="admin-login-gate">
+    <form id="adminLoginForm" class="admin-login-card">
+      <h1>Acesso ao painel</h1>
+      <p>Digite a senha administrativa para continuar.</p>
+      <input id="adminPasswordInput" type="password" autocomplete="current-password" placeholder="Senha do painel" required />
+      <button id="adminLoginButton" class="save-button" type="submit">Entrar</button>
+      <p id="adminLoginError" class="admin-login-error" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <main id="adminMain" class="admin-page" hidden>
     <header class="admin-heading">
       <h1>Admin — Premiação</h1>
       <p>Todas as alterações são salvas online e valem para todos os dispositivos.</p>
@@ -130,6 +140,6 @@
     <a class="admin-back" href="../">←&nbsp; Voltar à página principal</a>
   </main>
 
-  <script src="../../assets/admin.js?v=20261125-layout-fix3"></script>
+  <script src="../../../assets/admin.js?v=20261125-admin-login1"></script>
 </body>
 </html>
