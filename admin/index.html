@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" href="../assets/share-familhao.png?v=10" />
   <link rel="shortcut icon" href="../assets/share-familhao.png?v=10" />
   <link rel="apple-touch-icon" href="../assets/share-familhao.png?v=10" />
-  <link rel="stylesheet" href="../../../assets/style.css?v=20261125-admin-login1" />
+  <link rel="stylesheet" href="../assets/style.css?v=20261125-apk-status4" />
 </head>
 <body class="admin-body">
   <section id="adminLoginGate" class="admin-login-gate">
@@ -101,9 +101,22 @@
       </div>
 
       <div id="apkCurrentInfo" class="apk-current-info">
-        <strong id="apkCurrentName">Nenhum APK disponível</strong>
-        <span id="apkCurrentMeta">—</span>
+        <strong id="apkCurrentName">Verificando aplicativo...</strong>
+        <span id="apkCurrentMeta">Consultando armazenamento...</span>
       </div>
+
+      <div class="download-control-card">
+        <div class="download-control-copy">
+          <strong>Permissão de download</strong>
+          <span id="downloadPermissionStatus">Carregando status...</span>
+        </div>
+        <button id="downloadPermissionButton" class="download-permission-button" type="button">
+          Carregando...
+        </button>
+        <input id="downloadEnabledInput" name="downloadEnabled" type="checkbox" hidden />
+      </div>
+
+      <div class="admin-divider apk-permission-divider"></div>
 
       <label class="apk-file-field">
         <span>Selecionar novo APK</span>
@@ -117,18 +130,6 @@
         <button id="apkDeleteButton" class="apk-delete-button" type="button">Excluir APK atual</button>
       </div>
 
-      <div class="admin-divider"></div>
-      <div class="download-control-card">
-        <div class="download-control-copy">
-          <strong>Permissão de download</strong>
-          <span id="downloadPermissionStatus">Carregando status...</span>
-        </div>
-        <button id="downloadPermissionButton" class="download-permission-button" type="button">
-          Carregando...
-        </button>
-        <input id="downloadEnabledInput" name="downloadEnabled" type="checkbox" hidden />
-      </div>
-
       <div id="apkProgressWrap" class="apk-progress-wrap" hidden>
         <div class="apk-progress-track">
           <div id="apkProgressBar" class="apk-progress-bar"></div>
@@ -140,6 +141,6 @@
     <a class="admin-back" href="../">←&nbsp; Voltar à página principal</a>
   </main>
 
-  <script src="../../../assets/admin.js?v=20261125-admin-login1"></script>
+  <script src="../assets/admin.js?v=20261125-apk-status4"></script>
 </body>
 </html>
