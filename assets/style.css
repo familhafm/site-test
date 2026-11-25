@@ -226,3 +226,56 @@ button,input,textarea,select{font:inherit}
     width:100%;
   }
 }
+
+
+/* Login do painel administrativo */
+.admin-login-gate{
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:24px;
+  background:#f7f5f0;
+}
+.admin-login-gate[hidden]{display:none!important}
+.admin-login-card{
+  width:min(100%,420px);
+  display:grid;
+  gap:16px;
+  padding:32px;
+  border:1px solid #dfe2e7;
+  border-radius:22px;
+  background:#fff;
+  box-shadow:0 14px 30px rgba(31,35,47,.11);
+}
+.admin-login-card h1{
+  margin:0;
+  text-align:center;
+  font-family:'Anton',sans-serif;
+  font-size:34px;
+  font-weight:400;
+  color:#111827;
+}
+.admin-login-card p{
+  margin:0;
+  text-align:center;
+  color:#7b8593;
+  font-size:13px;
+}
+.admin-login-card input{
+  width:100%;
+  min-height:52px;
+  border:1px solid #d8dde4;
+  border-radius:14px;
+  background:#faf9f6;
+  padding:14px 16px;
+  outline:none;
+}
+.admin-login-card input:focus{
+  border-color:#cf6a4f;
+  box-shadow:0 0 0 3px rgba(255,138,76,.10);
+}
+.admin-login-error{
+  min-height:18px;
+  color:#b42318!important;
+  font-weight:600;
+}
