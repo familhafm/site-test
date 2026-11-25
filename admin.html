@@ -85,7 +85,7 @@
       <div class="apk-admin-header">
         <div>
           <h2>Aplicativo para download</h2>
-          <p>Envie ou substitua o APK privado e gere links individuais de uso único para usuários autorizados.</p>
+          <p>Envie ou substitua o APK privado. Os links de download são gerados automaticamente a cada solicitação.</p>
         </div>
         <span id="apkStatusBadge" class="apk-status-badge">Verificando...</span>
       </div>
@@ -107,24 +107,6 @@
         <button id="apkDeleteButton" class="apk-delete-button" type="button">Excluir APK atual</button>
       </div>
 
-      <div class="admin-divider"></div>
-
-      <div class="apk-link-panel">
-        <h3>Link privado de download</h3>
-        <p>Gere um endereço individual. Ele expira em 5 minutos e deixa de funcionar após o primeiro uso.</p>
-
-        <div class="apk-actions">
-          <button id="apkGenerateLinkButton" class="save-button" type="button">Gerar link único</button>
-          <button id="apkCopyGeneratedLink" class="restore-button" type="button">Copiar link</button>
-        </div>
-
-        <label class="apk-file-field">
-          <span>Link gerado</span>
-          <input id="apkGeneratedLink" type="text" readonly placeholder="O link aparecerá aqui" />
-        </label>
-        <div id="apkGeneratedMeta" class="apk-selected-info">Nenhum link gerado.</div>
-      </div>
-
       <div id="apkProgressWrap" class="apk-progress-wrap" hidden>
         <div class="apk-progress-track">
           <div id="apkProgressBar" class="apk-progress-bar"></div>
@@ -136,6 +118,6 @@
     <a class="admin-back" href="index.html">←&nbsp; Voltar à página principal</a>
   </main>
 
-  <script src="assets/admin.js?v=20261124-cleanup1"></script>
+  <script src="assets/admin.js?v=20261125-auto-download1"></script>
 </body>
 </html>
