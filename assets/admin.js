@@ -4,7 +4,6 @@ const APK_URL=WORKER_BASE+'/apk';
 const APK_UPLOAD_URL=WORKER_BASE+'/admin/apk/upload';
 const APK_DELETE_URL=WORKER_BASE+'/admin/apk/delete';
 const APK_STATUS_URL=WORKER_BASE+'/apk/status';
-const STORAGE_KEY='campanha-premiada-settings';
 const TOKEN_KEY='central-premios-admin-token';
 
 const defaults={
@@ -100,31 +99,19 @@ function handleUnauthorized(response){
 }
 
 async function loadGlobalConfig(){
-  try{
-    const response=await fetch(API_URL+'?t='+Date.now(),{
-      method:'GET',
-      cache:'no-store',
-      headers:{'Accept':'application/json'}
-    });
-    if(!response.ok) throw new Error('HTTP '+response.status);
-    const data=await response.json();
-    fillForm(data);
-    try{localStorage.setItem(STORAGE_KEY,JSON.stringify(data))}catch{}
-  }catch(error){
-    console.error(error);
-    try{
-      const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
-      fillForm(saved);
-      toast('Endpoint global indisponível. Exibindo cópia local.',3500);
-    }catch{
-      fillForm(defaults);
-    }
-  }
-}
+  const response=await fetch(API_URL+'?t='+Date.now(),{
+    method:'GET',
+    cache:'no-store',
+    headers:{'Accept':'application/json'}
+  });
 
-function saveLocalConfig(data){
-  localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
-  return data;
+  if(!response.ok){
+    const detail=await response.text().catch(()=> '');
+    throw new Error('HTTP '+response.status+' '+detail);
+  }
+
+  const data=await response.json();
+  fillForm(data);
 }
 
 async function mirrorRemoteConfig(data){
@@ -304,28 +291,19 @@ document.getElementById('settingsForm')?.addEventListener('submit',async e=>{
   const button=e.submitter || document.querySelector('.save-button');
   if(button) button.disabled=true;
 
-  const data=collectForm();
-
   try{
-    saveLocalConfig(data);
-  }catch(error){
-    console.error(error);
-    toast('Não foi possível salvar neste navegador.',3500);
-    if(button) button.disabled=false;
-    return;
-  }
-
-  try{
+    const data=collectForm();
     await mirrorRemoteConfig(data);
-    toast('Alterações salvas e publicadas no site.');
+    toast('Alterações salvas online.');
+    await loadGlobalConfig();
   }catch(error){
     console.error(error);
     if(error.message==='TOKEN_REQUIRED'){
-      toast('Salvo localmente. Para publicar globalmente, informe o ADMIN_TOKEN.',4500);
+      toast('Informe o ADMIN_TOKEN para salvar.',4500);
     }else if(error.message==='UNAUTHORIZED'){
-      toast('Salvo localmente. ADMIN_TOKEN incorreto para publicação global.',5000);
+      toast('ADMIN_TOKEN incorreto.',5000);
     }else{
-      toast('Salvo localmente, mas o endpoint global está indisponível.',5000);
+      toast('Erro ao salvar online: '+(error?.message||'falha desconhecida'),6000);
     }
   }finally{
     if(button) button.disabled=false;
@@ -333,23 +311,16 @@ document.getElementById('settingsForm')?.addEventListener('submit',async e=>{
 });
 
 document.getElementById('restoreButton')?.addEventListener('click',async()=>{
-  if(!confirm('Restaurar os valores padrão?')) return;
-
-  try{
-    saveLocalConfig(defaults);
-    fillForm(defaults);
-  }catch(error){
-    console.error(error);
-    toast('Não foi possível restaurar neste navegador.',3500);
-    return;
-  }
+  if(!confirm('Restaurar os valores padrão online?')) return;
 
   try{
     await mirrorRemoteConfig(defaults);
-    toast('Padrão restaurado e publicado no site.');
+    await loadGlobalConfig();
+    toast('Padrão restaurado online.');
   }catch(error){
     console.error(error);
-    toast('Padrão restaurado localmente, mas o endpoint global está indisponível.',5000);
+    if(error.message==='UNAUTHORIZED') toast('ADMIN_TOKEN incorreto.',5000);
+    else toast('Não foi possível restaurar online.',4500);
   }
 });
 
@@ -363,5 +334,8 @@ document.getElementById('apkFileInput')?.addEventListener('change',event=>{
 document.getElementById('apkUploadButton')?.addEventListener('click',uploadApk);
 document.getElementById('apkDeleteButton')?.addEventListener('click',deleteApk);
 
-loadGlobalConfig();
+loadGlobalConfig().catch(error=>{
+  console.error(error);
+  toast('Não foi possível carregar a configuração online.',5000);
+});
 loadApkStatus();
