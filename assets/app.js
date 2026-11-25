@@ -1,7 +1,6 @@
 const WORKER_BASE='https://download.centraldepremios.online';
 const API_URL=WORKER_BASE+'/config';
 const APK_LINK_URL=WORKER_BASE+'/api/v1/generate-token';
-const STORAGE_KEY='campanha-premiada-settings';
 
 const defaults={
   downloadEnabled:'false',
@@ -51,30 +50,19 @@ function render(){
 }
 
 async function loadGlobalConfig(){
-  try{
-    const response=await fetch(API_URL+'?t='+Date.now(),{
-      method:'GET',
-      cache:'no-store',
-      headers:{'Accept':'application/json'}
-    });
+  const response=await fetch(API_URL+'?t='+Date.now(),{
+    method:'GET',
+    cache:'no-store',
+    headers:{'Accept':'application/json'}
+  });
 
-    if(!response.ok) throw new Error('HTTP '+response.status);
-
-    const remote=await response.json();
-    settings={...defaults,...remote};
-
-    try{
-      localStorage.setItem(STORAGE_KEY,JSON.stringify(settings));
-    }catch{}
-  }catch(error){
-    console.error('Endpoint global indisponível, usando cache local:',error);
-    try{
-      settings={...defaults,...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')};
-    }catch{
-      settings={...defaults};
-    }
+  if(!response.ok){
+    const detail=await response.text().catch(()=> '');
+    throw new Error('HTTP '+response.status+' '+detail);
   }
 
+  const remote=await response.json();
+  settings={...defaults,...remote};
   render();
 }
 
@@ -188,7 +176,9 @@ document.getElementById('apkDownloadButton')?.addEventListener('click',downloadA
 
 render();
 launchConfetti();
-loadGlobalConfig();
+loadGlobalConfig().catch(error=>{
+  console.error('Falha ao carregar configuração online:',error);
+});
 
 window.addEventListener('focus',loadGlobalConfig);
 document.addEventListener('visibilitychange',()=>{
