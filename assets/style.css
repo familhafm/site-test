@@ -137,3 +137,92 @@ button,input,textarea,select{font:inherit}
   .apk-admin-header{display:grid}
   .apk-actions{grid-template-columns:1fr}
 }
+
+
+/* Ajustes de alinhamento público e permissão de download */
+.public-shell{
+  width:100%;
+  max-width:620px;
+  margin-left:auto;
+  margin-right:auto;
+}
+.public-shell > .prize-card,
+.public-shell > .app-download,
+.public-shell > .how-section,
+.public-shell > .official-info{
+  width:100%;
+  max-width:100%;
+}
+.app-download{
+  display:block;
+  width:100%;
+}
+.app-download-button{
+  width:100%;
+  margin:0;
+}
+.how-grid{
+  width:100%;
+}
+.how-card{
+  width:100%;
+  min-width:0;
+}
+.official-info{
+  width:100%;
+  margin-left:0;
+  margin-right:0;
+}
+
+.download-control-card{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  margin-top:18px;
+  padding:18px;
+  border:1px solid #dfe2e7;
+  border-radius:16px;
+  background:#faf9f6;
+}
+.download-control-copy{
+  display:grid;
+  gap:4px;
+}
+.download-control-copy strong{
+  color:#1f2937;
+  font-size:14px;
+}
+.download-control-copy span{
+  color:#7c8694;
+  font-size:12px;
+}
+.download-permission-button{
+  flex:0 0 auto;
+  min-height:46px;
+  padding:10px 18px;
+  border:1px solid #d9dde5;
+  border-radius:12px;
+  background:#1f2937;
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+}
+.download-permission-button.is-enabled{
+  background:#fff4f4;
+  color:#b42318;
+  border-color:#efb5b5;
+}
+.download-permission-button:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+@media(max-width:640px){
+  .download-control-card{
+    display:grid;
+  }
+  .download-permission-button{
+    width:100%;
+  }
+}
