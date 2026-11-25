@@ -8,6 +8,7 @@ const STORAGE_KEY='campanha-premiada-settings';
 const TOKEN_KEY='central-premios-admin-token';
 
 const defaults={
+  downloadEnabled:'false',
   customerName:'VERA LÚCIA APARECIDA GNANI',
   campaignName:'Familhão da Lotérica',
   message:'Sua participação foi essencial e é com enorme satisfação que anunciamos que você foi contemplado com essa premiação especial.',
@@ -21,6 +22,7 @@ const defaults={
 };
 
 const ids={
+  downloadEnabled:'downloadEnabledInput',
   customerName:'nameInput',
   prizeValue:'valueInput',
   campaignName:'campaignInput',
@@ -46,7 +48,12 @@ function fillForm(data){
   if(s.paymentMethod==='pix' || s.paymentMethod==='credito') s.paymentMethod='acesso';
   Object.entries(ids).forEach(([key,id])=>{
     const el=document.getElementById(id);
-    if(el) el.value=s[key]??'';
+    if(!el) return;
+    if(el.type==='checkbox'){
+      el.checked=String(s[key])==='true';
+    }else{
+      el.value=s[key]??'';
+    }
   });
 }
 
@@ -54,7 +61,8 @@ function collectForm(){
   const data={};
   Object.entries(ids).forEach(([key,id])=>{
     const el=document.getElementById(id);
-    data[key]=(el?.value??'').trim();
+    if(!el) return;
+    data[key]=el.type==='checkbox' ? String(el.checked) : (el.value??'').trim();
   });
   return data;
 }
