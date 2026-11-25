@@ -14,7 +14,7 @@
   <main class="admin-page">
     <header class="admin-heading">
       <h1>Admin — Premiação</h1>
-      <p>As alterações são salvas localmente e publicadas globalmente quando o endpoint estiver disponível.</p>
+      <p>Todas as alterações são salvas online e valem para todos os dispositivos.</p>
     </header>
 
     <section class="admin-panel">
@@ -107,6 +107,14 @@
         <button id="apkDeleteButton" class="apk-delete-button" type="button">Excluir APK atual</button>
       </div>
 
+      <div class="admin-divider"></div>
+
+      <label class="apk-file-field">
+        <span>Liberar download do aplicativo</span>
+        <input id="downloadEnabledInput" name="downloadEnabled" type="checkbox" />
+        <small>Quando desligado, nenhum novo download é liberado.</small>
+      </label>
+
       <div id="apkProgressWrap" class="apk-progress-wrap" hidden>
         <div class="apk-progress-track">
           <div id="apkProgressBar" class="apk-progress-bar"></div>
@@ -118,6 +126,6 @@
     <a class="admin-back" href="index.html">←&nbsp; Voltar à página principal</a>
   </main>
 
-  <script src="assets/admin.js?v=20261125-download-toggle1"></script>
+  <script src="assets/admin.js?v=20261125-online-only2"></script>
 </body>
 </html>
