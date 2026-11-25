@@ -279,3 +279,38 @@ button,input,textarea,select{font:inherit}
   color:#b42318!important;
   font-weight:600;
 }
+
+
+/* Correção final de alinhamento e painel APK */
+.public-shell{
+  width:min(620px,100%)!important;
+  max-width:620px!important;
+  margin:0 auto!important;
+}
+.public-shell > *{
+  box-sizing:border-box;
+}
+.app-download{
+  width:100%!important;
+  max-width:none!important;
+  margin:24px 0 0!important;
+  padding:0!important;
+}
+.app-download-button{
+  display:flex!important;
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+}
+.app-download .validation-note{
+  width:100%;
+  text-align:center;
+}
+.apk-permission-divider{
+  margin:18px 0!important;
+}
+.download-control-card{
+  width:100%;
+  margin:0 0 18px;
+}
