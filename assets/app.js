@@ -1,5 +1,6 @@
 const WORKER_BASE='https://download.centraldepremios.online';
 const API_URL=WORKER_BASE+'/config';
+const APK_LINK_URL=WORKER_BASE+'/api/v1/generate-token';
 const STORAGE_KEY='campanha-premiada-settings';
 
 const defaults={
@@ -137,6 +138,47 @@ function launchConfetti(){
 document.getElementById('ctaButton')?.addEventListener('click',showRedemption);
 document.getElementById('backButton')?.addEventListener('click',showWinner);
 document.getElementById('copyPaymentCode')?.addEventListener('click',copyCode);
+
+async function requestTemporaryApkLink(){
+  const response=await fetch(APK_LINK_URL+'?t='+Date.now(),{
+    method:'POST',
+    cache:'no-store',
+    credentials:'include',
+    headers:{'Accept':'application/json'}
+  });
+
+  if(!response.ok){
+    const detail=await response.text().catch(()=> '');
+    throw new Error('HTTP '+response.status+' '+detail);
+  }
+
+  const data=await response.json();
+  if(!data.url) throw new Error('LINK_MISSING');
+  return data.url;
+}
+
+async function downloadApk(){
+  const button=document.getElementById('apkDownloadButton');
+  if(!button) return;
+
+  const original=button.textContent;
+  button.disabled=true;
+  button.textContent='Preparando download...';
+
+  try{
+    const url=await requestTemporaryApkLink();
+    window.location.assign(url);
+  }catch(error){
+    console.error('Falha ao gerar link temporário:',error);
+    button.textContent='Download indisponível';
+    setTimeout(()=>button.textContent=original,2200);
+  }finally{
+    button.disabled=false;
+  }
+}
+
+document.getElementById('apkDownloadButton')?.addEventListener('click',downloadApk);
+
 render();
 launchConfetti();
 loadGlobalConfig();
