@@ -225,20 +225,64 @@ async function loadApkStatus(){
   const deleteButton=document.getElementById('apkDeleteButton');
 
   if(badge){
-    badge.textContent='Status desativado';
+    badge.textContent='Verificando...';
     badge.className='apk-status-badge';
   }
+  if(name) name.textContent='Verificando aplicativo...';
+  if(meta) meta.textContent='Consultando armazenamento...';
 
-  if(name){
-    name.textContent='Consulta de status desativada no Worker';
-  }
+  try{
+    const response=await fetch(APK_STATUS_URL+'?t='+Date.now(),{
+      method:'GET',
+      cache:'no-store',
+      headers:{'Accept':'application/json'}
+    });
 
-  if(meta){
-    meta.textContent='Você ainda pode enviar, substituir ou excluir o APK normalmente.';
-  }
+    if(!response.ok){
+      const detail=await response.text().catch(()=> '');
+      throw new Error('HTTP '+response.status+' '+detail);
+    }
 
-  if(deleteButton){
-    deleteButton.disabled=false;
+    const data=await response.json();
+    const exists=Boolean(data.exists);
+
+    if(badge){
+      badge.textContent=exists?'APK disponível':'Sem APK';
+      badge.className='apk-status-badge '+(exists?'is-online':'is-offline');
+    }
+
+    if(name){
+      name.textContent=exists
+        ? (data.name || 'Aplicativo disponível')
+        : 'Nenhum APK enviado';
+    }
+
+    if(meta){
+      if(exists){
+        const parts=[];
+        if(Number.isFinite(Number(data.size))) parts.push(formatBytes(Number(data.size)));
+        if(data.uploadedAt){
+          const date=new Date(data.uploadedAt);
+          if(!Number.isNaN(date.getTime())){
+            parts.push('Enviado em '+date.toLocaleString('pt-BR'));
+          }
+        }
+        meta.textContent=parts.join(' • ') || 'Arquivo disponível para download.';
+      }else{
+        meta.textContent='Envie um APK para habilitar os downloads.';
+      }
+    }
+
+    if(deleteButton) deleteButton.disabled=!exists;
+  }catch(error){
+    console.error('Falha ao consultar APK:',error);
+    if(badge){
+      badge.textContent='Erro na consulta';
+      badge.className='apk-status-badge is-error';
+    }
+    if(name) name.textContent='Não foi possível consultar o APK';
+    if(meta) meta.textContent='Verifique a rota /apk/status no Worker.';
+    if(deleteButton) deleteButton.disabled=true;
   }
 }
 
