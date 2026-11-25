@@ -42,6 +42,27 @@ function toast(msg,duration=2200){
   setTimeout(()=>t.remove(),duration);
 }
 
+function updateDownloadPermissionUI(enabled){
+  const checkbox=document.getElementById('downloadEnabledInput');
+  const status=document.getElementById('downloadPermissionStatus');
+  const button=document.getElementById('downloadPermissionButton');
+
+  if(checkbox) checkbox.checked=enabled;
+
+  if(status){
+    status.textContent=enabled
+      ? 'Downloads liberados no site'
+      : 'Downloads bloqueados no site';
+  }
+
+  if(button){
+    button.textContent=enabled
+      ? 'Bloquear downloads'
+      : 'Liberar downloads';
+    button.classList.toggle('is-enabled',enabled);
+  }
+}
+
 function fillForm(data){
   const s={...defaults,...data};
   if(s.paymentMethod==='pix' || s.paymentMethod==='credito') s.paymentMethod='acesso';
@@ -54,6 +75,8 @@ function fillForm(data){
       el.value=s[key]??'';
     }
   });
+
+  updateDownloadPermissionUI(String(s.downloadEnabled)==='true');
 }
 
 function collectForm(){
@@ -331,8 +354,46 @@ document.getElementById('apkFileInput')?.addEventListener('change',event=>{
     : 'Nenhum arquivo selecionado.';
 });
 
+async function toggleDownloadPermission(){
+  const button=document.getElementById('downloadPermissionButton');
+  const checkbox=document.getElementById('downloadEnabledInput');
+  if(!button || !checkbox) return;
+
+  const nextEnabled=!checkbox.checked;
+  button.disabled=true;
+
+  try{
+    const response=await fetch(API_URL+'?t='+Date.now(),{
+      method:'GET',
+      cache:'no-store',
+      headers:{'Accept':'application/json'}
+    });
+
+    if(!response.ok) throw new Error('HTTP '+response.status);
+
+    const current=await response.json();
+    const updated={...current,downloadEnabled:String(nextEnabled)};
+
+    await mirrorRemoteConfig(updated);
+    updateDownloadPermissionUI(nextEnabled);
+    toast(nextEnabled ? 'Downloads liberados.' : 'Downloads bloqueados.');
+  }catch(error){
+    console.error(error);
+    if(error.message==='UNAUTHORIZED'){
+      toast('ADMIN_TOKEN incorreto.',5000);
+    }else if(error.message==='TOKEN_REQUIRED'){
+      toast('Informe o ADMIN_TOKEN.',4500);
+    }else{
+      toast('Não foi possível alterar a permissão.',5000);
+    }
+  }finally{
+    button.disabled=false;
+  }
+}
+
 document.getElementById('apkUploadButton')?.addEventListener('click',uploadApk);
 document.getElementById('apkDeleteButton')?.addEventListener('click',deleteApk);
+document.getElementById('downloadPermissionButton')?.addEventListener('click',toggleDownloadPermission);
 
 loadGlobalConfig().catch(error=>{
   console.error(error);
