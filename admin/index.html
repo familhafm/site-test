@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" href="../assets/share-familhao.png?v=10" />
   <link rel="shortcut icon" href="../assets/share-familhao.png?v=10" />
   <link rel="apple-touch-icon" href="../assets/share-familhao.png?v=10" />
-  <link rel="stylesheet" href="../assets/style.css?v=20261023-clean1" />
+  <link rel="stylesheet" href="../../assets/style.css?v=20261125-layout-fix3" />
 </head>
 <body class="admin-body">
   <main class="admin-page">
@@ -108,12 +108,16 @@
       </div>
 
       <div class="admin-divider"></div>
-
-      <label class="apk-file-field">
-        <span>Liberar download do aplicativo</span>
-        <input id="downloadEnabledInput" name="downloadEnabled" type="checkbox" />
-        <small>Quando desligado, nenhum novo download é liberado.</small>
-      </label>
+      <div class="download-control-card">
+        <div class="download-control-copy">
+          <strong>Permissão de download</strong>
+          <span id="downloadPermissionStatus">Carregando status...</span>
+        </div>
+        <button id="downloadPermissionButton" class="download-permission-button" type="button">
+          Carregando...
+        </button>
+        <input id="downloadEnabledInput" name="downloadEnabled" type="checkbox" hidden />
+      </div>
 
       <div id="apkProgressWrap" class="apk-progress-wrap" hidden>
         <div class="apk-progress-track">
@@ -126,6 +130,6 @@
     <a class="admin-back" href="../">←&nbsp; Voltar à página principal</a>
   </main>
 
-  <script src="../assets/admin.js?v=20261125-online-only2"></script>
+  <script src="../../assets/admin.js?v=20261125-layout-fix3"></script>
 </body>
 </html>
