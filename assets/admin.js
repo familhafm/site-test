@@ -99,13 +99,66 @@ function formatBytes(bytes){
 }
 
 function getAdminToken(){
-  let token=sessionStorage.getItem(TOKEN_KEY)||'';
-  if(!token){
-    token=prompt('Digite o ADMIN_TOKEN configurado no Cloudflare:')||'';
-    token=token.trim();
-    if(token) sessionStorage.setItem(TOKEN_KEY,token);
-  }
-  return token;
+  return (sessionStorage.getItem(TOKEN_KEY)||'').trim();
+}
+
+function showAdminPanel(){
+  const gate=document.getElementById('adminLoginGate');
+  const main=document.getElementById('adminMain');
+  if(gate) gate.hidden=true;
+  if(main) main.hidden=false;
+}
+
+function showLoginGate(message=''){
+  const gate=document.getElementById('adminLoginGate');
+  const main=document.getElementById('adminMain');
+  const error=document.getElementById('adminLoginError');
+  if(main) main.hidden=true;
+  if(gate) gate.hidden=false;
+  if(error) error.textContent=message;
+}
+
+async function validateAdminPassword(password){
+  const configResponse=await fetch(API_URL+'?t='+Date.now(),{
+    method:'GET',
+    cache:'no-store',
+    headers:{'Accept':'application/json'}
+  });
+
+  if(!configResponse.ok) throw new Error('CONFIG_UNAVAILABLE');
+  const currentConfig=await configResponse.json();
+
+  const response=await fetch(API_URL,{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'Authorization':'Bearer '+password
+    },
+    body:JSON.stringify(currentConfig)
+  });
+
+  if(response.status===401) return false;
+  if(!response.ok) throw new Error('AUTH_UNAVAILABLE');
+  return true;
+}
+
+async function loginAdmin(password){
+  const clean=(password||'').trim();
+  if(!clean) return false;
+
+  const valid=await validateAdminPassword(clean);
+  if(!valid) return false;
+
+  sessionStorage.setItem(TOKEN_KEY,clean);
+  showAdminPanel();
+  await loadGlobalConfig();
+  await loadApkStatus();
+  return true;
+}
+
+function logoutAdmin(){
+  sessionStorage.removeItem(TOKEN_KEY);
+  showLoginGate();
 }
 
 function authHeaders(extra={}){
@@ -117,6 +170,7 @@ function authHeaders(extra={}){
 function handleUnauthorized(response){
   if(response.status===401){
     sessionStorage.removeItem(TOKEN_KEY);
+    showLoginGate('Sessão expirada. Digite a senha novamente.');
     throw new Error('UNAUTHORIZED');
   }
 }
@@ -152,6 +206,7 @@ async function mirrorRemoteConfig(data){
 
   if(response.status===401){
     sessionStorage.removeItem(TOKEN_KEY);
+    showLoginGate('Senha incorreta ou sessão expirada.');
     throw new Error('UNAUTHORIZED');
   }
 
@@ -395,8 +450,54 @@ document.getElementById('apkUploadButton')?.addEventListener('click',uploadApk);
 document.getElementById('apkDeleteButton')?.addEventListener('click',deleteApk);
 document.getElementById('downloadPermissionButton')?.addEventListener('click',toggleDownloadPermission);
 
-loadGlobalConfig().catch(error=>{
-  console.error(error);
-  toast('Não foi possível carregar a configuração online.',5000);
+document.getElementById('adminLoginForm')?.addEventListener('submit',async e=>{
+  e.preventDefault();
+
+  const input=document.getElementById('adminPasswordInput');
+  const button=document.getElementById('adminLoginButton');
+  const error=document.getElementById('adminLoginError');
+  const password=input?.value||'';
+
+  if(button) button.disabled=true;
+  if(error) error.textContent='';
+
+  try{
+    const ok=await loginAdmin(password);
+    if(!ok){
+      if(error) error.textContent='Senha incorreta.';
+      if(input){
+        input.value='';
+        input.focus();
+      }
+    }
+  }catch(err){
+    console.error(err);
+    if(error) error.textContent='Não foi possível validar a senha agora.';
+  }finally{
+    if(button) button.disabled=false;
+  }
 });
-loadApkStatus();
+
+(async()=>{
+  const token=getAdminToken();
+
+  if(!token){
+    showLoginGate();
+    document.getElementById('adminPasswordInput')?.focus();
+    return;
+  }
+
+  try{
+    const valid=await validateAdminPassword(token);
+    if(valid){
+      showAdminPanel();
+      await loadGlobalConfig();
+      await loadApkStatus();
+    }else{
+      logoutAdmin();
+    }
+  }catch(error){
+    console.error(error);
+    showLoginGate('Não foi possível validar a sessão.');
+  }
+})();
